@@ -13,6 +13,8 @@ interface Entry extends DriveFile {
   owner: string;
   content?: unknown; // JSON
   blob?: Blob;
+  /** false = tylko właściciel zmienia uprawnienia (jak „Edytorzy mogą zmieniać uprawnienia” w Dysku). */
+  writersCanShare?: boolean;
 }
 
 /**
@@ -52,6 +54,15 @@ export class FakeDrive {
     return (e.parents ?? []).some((p) => this.canAccess(email, p, depth + 1));
   }
 
+  /** Czy `email` może zmieniać uprawnienia: właściciel zawsze, edytor tylko gdy nikt wyżej tego nie zablokował. */
+  private canShare(email: string, id: string | undefined, depth = 0): boolean {
+    const e = id ? this.entries.get(id) : undefined;
+    if (!e || depth > 10) return true;
+    if (e.owner === email) return true;
+    if (e.writersCanShare === false) return false;
+    return (e.parents ?? []).every((p) => this.canShare(email, p, depth + 1));
+  }
+
   /** Widok tego Dysku dla jednego użytkownika (np. jednego urządzenia). */
   as(email: string): DriveApi {
     const self = this;
@@ -80,9 +91,16 @@ export class FakeDrive {
         const owner: DrivePermission = { id: `owner-${fileId}`, emailAddress: self.entries.get(fileId)!.owner, role: 'owner' };
         return [owner, ...(self.permissions.get(fileId) ?? [])];
       },
+      async restrictSharing(fileId) {
+        self.guard();
+        const e = need(fileId);
+        if (e.owner !== email) throw new DriveError('Tylko właściciel może to zmienić', 403);
+        e.writersCanShare = false;
+      },
       async createPermission(fileId, target, role) {
         self.guard();
         need(fileId);
+        if (!self.canShare(email, fileId)) throw new DriveError('Nie masz prawa udostępniania', 403);
         const list = self.permissions.get(fileId) ?? [];
         if (!list.some((p) => p.emailAddress === target)) {
           list.push({ id: `perm${++self.seq}`, emailAddress: target, role });
@@ -92,6 +110,7 @@ export class FakeDrive {
       async deletePermission(fileId, permissionId) {
         self.guard();
         need(fileId);
+        if (!self.canShare(email, fileId)) throw new DriveError('Nie masz prawa udostępniania', 403);
         self.permissions.set(
           fileId,
           (self.permissions.get(fileId) ?? []).filter((p) => p.id !== permissionId),

@@ -63,6 +63,23 @@ describe('eksport katalogu CSV', () => {
     expect(text).toContain('Łukasz Żółkiewski');
   });
 
+  it('komórki wyglądające jak formuły dostają apostrof, a importer go zdejmuje', () => {
+    const evil = ['=HYPERLINK("http://zly.pl";"x")', '+1+1', '-2+3', '@SUM(A1)'];
+    const works = evil.map((title, i) =>
+      art({ id: `e${i}`, invNo: `SZK-2026-010${i}`, title, artist: 'Anna', description: '=cmd|calc!A0' }),
+    );
+    const csv = decodeText(buildCatalogCsv(works, new Map(), { includePrivate: false }));
+
+    // po rozbiciu CSV na komórki żadna nie zaczyna się od znaku formuły
+    const cells = Papa.parse<string[]>(csv, { delimiter: ';', skipEmptyLines: true }).data.slice(1);
+    expect(cells.map((r) => r[1])).toEqual(evil.map((t) => `'${t}`));
+    for (const row of cells) for (const cell of row) expect(cell).not.toMatch(/^[=+\-@\t\r]/);
+
+    const table = parseCsv(csv);
+    const plan = buildPlan(table, autoMap(table.headers), DEFAULT_OPTIONS, []);
+    expect(plan.rows.map((r) => r.input.title)).toEqual(evil);
+  });
+
   it('eksport da się wczytać z powrotem importerem — bez ręcznej edycji i bez utraty danych', () => {
     const original = [
       art(),

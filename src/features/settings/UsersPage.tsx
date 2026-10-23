@@ -31,6 +31,18 @@ export function UsersPage() {
     );
   }
 
+  if (!state.isOwner) {
+    return (
+      <div className={styles.stack}>
+        <PageHeader title="Użytkownicy" backTo="/ustawienia" backLabel="Ustawienia" />
+        <p className={ui.hint}>
+          Osoby dodaje i usuwa tylko właściciel folderu na Dysku Google, czyli konto, które założyło katalog. Zaloguj się
+          na to konto, żeby zmienić listę.
+        </p>
+      </div>
+    );
+  }
+
   async function run(action: () => Promise<void>, done: string) {
     setBusy(true);
     try {

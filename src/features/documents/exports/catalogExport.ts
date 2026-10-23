@@ -73,7 +73,11 @@ export function catalogTable(artworks: Artwork[], prices: Map<string, PrivatePri
 
 const encoder = new TextEncoder();
 
-/** CSV po polsku: UTF-8 z BOM (Excel widzi polskie znaki), separator średnik, przecinek dziesiętny. */
+/**
+ * CSV po polsku: UTF-8 z BOM (Excel widzi polskie znaki), separator średnik, przecinek dziesiętny.
+ * Komórki zaczynające się od = + - @ (tytuł, uwagi, nazwisko) dostają apostrof na początku, żeby Excel
+ * nie wykonał ich jako formuły; importer ten apostrof usuwa.
+ */
 export function buildCatalogCsv(artworks: Artwork[], prices: Map<string, PrivatePrices>, opts: CatalogExportOptions): Uint8Array {
   const { headers, rows } = catalogTable(artworks, prices, opts);
   const text = Papa.unparse(
@@ -81,7 +85,7 @@ export function buildCatalogCsv(artworks: Artwork[], prices: Map<string, Private
       fields: headers,
       data: rows.map((r) => r.map((c) => (typeof c === 'number' ? String(c).replace('.', ',') : (c ?? '')))),
     },
-    { delimiter: ';', newline: '\r\n' },
+    { delimiter: ';', newline: '\r\n', escapeFormulae: true },
   );
   return encoder.encode(`﻿${text}`);
 }

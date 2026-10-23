@@ -2,6 +2,7 @@ import { restoreFromBackup } from '../db/backupRestore';
 import { KEEP_BACKUPS } from './backups';
 import { FakeDrive } from './fakeDrive';
 import { PRIVATE_ROOT_NAME } from './access';
+import type { AppUser } from './access';
 import type { RemoteSettings } from './remoteFormat';
 import { device, edit, iso, seed, type Device } from './testHelpers';
 
@@ -15,6 +16,8 @@ async function putPrices(d: Device, artworkId: string, purchasePrice: number, mi
 
 const settingsOf = (drive: FakeDrive) =>
   [...drive.entries.values()].find((e) => e.name === 'settings.json')!.content as RemoteSettings;
+const entryNamed = (drive: FakeDrive, name: string) => [...drive.entries.values()].find((e) => e.name === name)!;
+const usersOf = (drive: FakeDrive) => (entryNamed(drive, 'users.json').content as { users: AppUser[] }).users;
 
 describe('role i uprawnienia', () => {
   it('pierwsza zalogowana osoba zostaje adminem i dostaje folder z cenami', async () => {
@@ -23,7 +26,7 @@ describe('role i uprawnienia', () => {
     await admin.engine.syncNow();
 
     expect(admin.engine.getAccess()?.role).toBe('admin');
-    expect(settingsOf(drive).users).toEqual([{ email: ADMIN, role: 'admin' }]);
+    expect(usersOf(drive)).toEqual([{ email: ADMIN, role: 'admin' }]);
     const names = [...drive.entries.values()].map((e) => e.name);
     expect(names).toEqual(expect.arrayContaining([PRIVATE_ROOT_NAME, 'prices']));
   });
@@ -129,7 +132,87 @@ describe('role i uprawnienia', () => {
 
     await admin.engine.removeUser(STAFF);
     expect(await drive.as(STAFF).findFolder('SztuKaFe-Katalog')).toBeUndefined();
-    expect(settingsOf(drive).users).toEqual([{ email: ADMIN, role: 'admin' }]);
+    expect(usersOf(drive)).toEqual([{ email: ADMIN, role: 'admin' }]);
+  });
+});
+
+describe('zabezpieczenia po stronie Dysku', () => {
+  it('pracownik nie awansuje się, edytując settings.json', async () => {
+    const drive = new FakeDrive();
+    const admin = device(drive, ADMIN);
+    const staff = device(drive, STAFF);
+    await admin.engine.syncNow();
+    await admin.engine.setUserRole(STAFF, 'pracownik');
+
+    // pracownik ma zapis w folderze config, więc dopisuje siebie jako admina (stary format) albo czyści listę
+    const config = entryNamed(drive, 'config');
+    await drive.as(ADMIN).writeJson({ name: 'settings.json', parentId: config.id, data: { version: 1, counter: {} } });
+    const file = entryNamed(drive, 'settings.json');
+    file.content = { ...(file.content as object), users: [{ email: STAFF, role: 'admin' }] };
+    await staff.engine.syncNow();
+    expect(staff.engine.getAccess()?.role).toBe('pracownik');
+
+    file.content = { ...(file.content as object), users: [] };
+    await staff.engine.syncNow();
+    expect(staff.engine.getAccess()?.role).toBe('pracownik');
+    await expect(staff.engine.createBackup()).rejects.toThrow(/admin/);
+  });
+
+  it('pracownik z własnym „prywatnym” folderem nie może nikomu udostępnić katalogu', async () => {
+    const drive = new FakeDrive();
+    const admin = device(drive, ADMIN);
+    await admin.engine.syncNow();
+    await admin.engine.setUserRole(STAFF, 'pracownik');
+
+    // atak: pracownik zakłada własny SztuKaFe-Prywatne z users.json, w którym jest adminem
+    const evil = drive.as(STAFF);
+    const fake = await evil.createFolder(PRIVATE_ROOT_NAME);
+    await evil.writeJson({ name: 'users.json', parentId: fake.id, data: { version: 1, users: [{ email: STAFF, role: 'admin' }] } });
+    const staff = device(drive, STAFF);
+    await staff.engine.syncNow();
+    expect(staff.engine.getAccess()).toMatchObject({ role: 'admin', isOwner: false });
+    await expect(staff.engine.setUserRole('obcy@x.pl', 'pracownik')).rejects.toThrow(/właściciel/);
+
+    // …a nawet bezpośrednie wywołanie Dysku jest odrzucone, bo edytorzy nie mogą zmieniać uprawnień
+    const root = entryNamed(drive, 'SztuKaFe-Katalog');
+    await expect(evil.createPermission(root.id, 'obcy@x.pl', 'writer')).rejects.toThrow(/udostępniania/);
+    const perm = (await evil.listPermissions(root.id)).find((p) => p.emailAddress === ADMIN)!;
+    await expect(evil.deletePermission(root.id, perm.id)).rejects.toThrow(/udostępniania/);
+    expect(drive.canAccess('obcy@x.pl', root.id)).toBe(false);
+  });
+
+  it('migruje listę osób ze starego settings.json do folderu prywatnego i nie ufa jej już', async () => {
+    const drive = new FakeDrive();
+    const admin = device(drive, ADMIN);
+    await admin.engine.syncNow();
+    await admin.engine.setUserRole(STAFF, 'pracownik');
+    // stan sprzed poprawki: lista w settings.json, brak users.json
+    const config = entryNamed(drive, 'config');
+    await drive.as(ADMIN).writeJson({ name: 'settings.json', parentId: config.id, data: { version: 1, counter: {} } });
+    const settings = entryNamed(drive, 'settings.json');
+    settings.content = { ...(settings.content as object), users: [{ email: ADMIN, role: 'admin' }, { email: STAFF, role: 'pracownik' }] };
+    drive.entries.delete(entryNamed(drive, 'users.json').id);
+
+    const again = device(drive, ADMIN);
+    await again.engine.syncNow();
+    expect(again.engine.getAccess()?.role).toBe('admin');
+    expect(usersOf(drive)).toEqual([{ email: ADMIN, role: 'admin' }, { email: STAFF, role: 'pracownik' }]);
+    expect(settingsOf(drive).users).toBeUndefined();
+  });
+
+  it('kopii zapasowych pracownik nie widzi ani nie usunie: leżą w prywatnym folderze', async () => {
+    const drive = new FakeDrive();
+    const admin = device(drive, ADMIN);
+    await seed(admin);
+    await admin.engine.syncNow();
+    await admin.engine.setUserRole(STAFF, 'pracownik');
+    const info = await admin.engine.createBackup();
+
+    const staffApi = drive.as(STAFF);
+    expect(drive.canAccess(STAFF, info.fileId)).toBe(false);
+    await expect(staffApi.readJson(info.fileId)).rejects.toThrow();
+    const shared = entryNamed(drive, 'SztuKaFe-Katalog');
+    expect((await staffApi.listFiles(shared.id)).map((f) => f.name)).not.toContain('backups');
   });
 });
 

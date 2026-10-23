@@ -5,6 +5,7 @@ import {
   ensurePrivateFolders,
   removeUser,
   resolveAccess,
+  restrictSharing,
   setUser,
   type AccessInfo,
   type AppUser,
@@ -37,6 +38,7 @@ const TOKEN_KEY = 'drive.changesToken';
 export const ACCESS_KEY = 'access';
 const PRIVATE_KEY = 'drive.private';
 const PRICES_PULLED_KEY = 'prices.pulled';
+const SHARING_LOCKED_KEY = 'drive.sharingLocked';
 const MAX_BACKOFF_MS = 30 * 60_000;
 
 /**
@@ -109,7 +111,6 @@ export class SyncEngine {
       artworksId: await sub(FOLDER_NAMES.artworks),
       photosId: await sub(FOLDER_NAMES.photos),
       configId: await sub(FOLDER_NAMES.config),
-      backupsId: await sub(FOLDER_NAMES.backups),
     };
     await this.db.meta.put({ key: FOLDERS_KEY, value: folders });
     return (this.folders = folders);
@@ -140,10 +141,12 @@ export class SyncEngine {
       if (!this.privateFolders) {
         this.privateFolders = (await db.meta.get(PRIVATE_KEY))?.value as PrivateFolders | undefined;
       }
-      if (!this.privateFolders) {
+      if (!this.privateFolders?.backupsId) {
+        // Brak folderu albo zapis sprzed przeniesienia kopii zapasowych do folderu prywatnego.
         this.privateFolders = await ensurePrivateFolders(this.drive);
         await db.meta.put({ key: PRIVATE_KEY, value: this.privateFolders });
       }
+      await this.lockSharing(folders, access);
       if (prev?.role !== 'admin') await db.meta.delete(PRICES_PULLED_KEY);
     } else {
       this.privateFolders = undefined;
@@ -155,6 +158,18 @@ export class SyncEngine {
       }
     }
     return access;
+  }
+
+  /** Właściciel raz odbiera edytorom prawo udostępniania; błąd nie przerywa synchronizacji (ponowimy później). */
+  private async lockSharing(folders: DriveFolders, access: AccessInfo): Promise<void> {
+    if (!access.isOwner || !this.privateFolders) return;
+    if ((await this.db.meta.get(SHARING_LOCKED_KEY))?.value === true) return;
+    try {
+      await restrictSharing(this.drive, folders, this.privateFolders);
+      await this.db.meta.put({ key: SHARING_LOCKED_KEY, value: true });
+    } catch (e) {
+      if (e instanceof AuthError || e instanceof NetworkError) throw e;
+    }
   }
 
   getAccess(): AccessInfo | undefined {
@@ -224,12 +239,12 @@ export class SyncEngine {
   async createBackup(): Promise<BackupInfo> {
     const ctx = await this.adminContext();
     const artworks = await this.db.artworks.toArray();
-    return createBackup(this.drive, ctx.folders, artworks, ctx.me.email, new Date(this.now()));
+    return createBackup(this.drive, ctx.privateFolders.backupsId, artworks, ctx.me.email, new Date(this.now()));
   }
 
   async listBackups(): Promise<BackupInfo[]> {
     const ctx = await this.adminContext();
-    return listBackups(this.drive, ctx.folders);
+    return listBackups(this.drive, ctx.privateFolders.backupsId);
   }
 
   async readBackup(fileId: string): Promise<BackupFile> {

@@ -6,15 +6,14 @@ export const FOLDER_NAMES = {
   artworks: 'artworks',
   photos: 'photos',
   config: 'config',
-  backups: 'backups',
 } as const;
 
+/** Kopie zapasowe leżą w prywatnym folderze admina (patrz `access.ts`), nie w folderze współdzielonym. */
 export interface DriveFolders {
   rootId: string;
   artworksId: string;
   photosId: string;
   configId: string;
-  backupsId: string;
 }
 
 export interface PhotoRef {

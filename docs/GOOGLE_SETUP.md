@@ -56,7 +56,7 @@ Do pracy lokalnej: skopiuj `.env.example` jako `.env.local` i wpisz identyfikato
 ## Krok 6. Pierwsze uruchomienie
 
 1. Otwórz aplikację na telefonie → **Ustawienia** → **Zaloguj przez Google**. Użyj konta, które ma być **właścicielem** katalogu.
-2. Zgódź się na dostęp do Dysku. Przy pierwszym logowaniu aplikacja sama założy w „Mój dysk” folder **SztuKaFe-Katalog** z podfolderami `artworks`, `photos`, `config`, `backups`.
+2. Zgódź się na dostęp do Dysku. Przy pierwszym logowaniu aplikacja sama założy w „Mój dysk” folder **SztuKaFe-Katalog** z podfolderami `artworks`, `photos`, `config` oraz osobny folder **SztuKaFe-Prywatne** (ceny, kopie zapasowe, lista osób), którego pracownicy nie widzą.
 3. W Ustawieniach powinno być widać konto i „Ostatnia synchronizacja”. Od teraz zmiany idą na Dysk same: przy starcie, po odzyskaniu internetu, po powrocie do aplikacji i co 2 minuty.
 
 ## Krok 7. Dodanie drugiej osoby

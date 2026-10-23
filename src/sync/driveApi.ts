@@ -59,6 +59,8 @@ export interface DriveApi {
   /** Udostępnia plik/folder osobie o danym adresie Google. */
   createPermission(fileId: string, email: string, role: 'writer' | 'reader'): Promise<void>;
   deletePermission(fileId: string, permissionId: string): Promise<void>;
+  /** Odbiera edytorom prawo udostępniania (`writersCanShare=false`): zmieniać uprawnienia może wtedy tylko właściciel. */
+  restrictSharing(fileId: string): Promise<void>;
   /** Szuka folderu o danej nazwie (dostępnego dla użytkownika, także udostępnionego). Najstarszy wygrywa. */
   findFolder(name: string, parentId?: string): Promise<DriveFile | undefined>;
   createFolder(name: string, parentId?: string): Promise<DriveFile>;

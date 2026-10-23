@@ -87,6 +87,14 @@ export class GoogleDriveClient implements DriveApi {
     }
   }
 
+  async restrictSharing(fileId: string): Promise<void> {
+    await this.request(`${API}/files/${fileId}?fields=id`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ writersCanShare: false }),
+    });
+  }
+
   private async listQuery(q: string, orderBy?: string): Promise<DriveFile[]> {
     const files: DriveFile[] = [];
     let pageToken: string | undefined;

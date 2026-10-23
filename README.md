@@ -23,7 +23,7 @@ Po wypchnięciu zmian do gałęzi `main` GitHub Actions budują aplikację i pub
 - **Admin** widzi wszystko, także ceny zakupu i minimalne, zarządza użytkownikami i kopiami zapasowymi.
 - **Pracownik** nie widzi cen zakupu ani minimalnych (ani w aplikacji, ani na Dysku Google).
 
-Pierwsza zalogowana osoba zostaje adminem. Kolejne dodaje admin w **Ustawienia → Użytkownicy i role**.
+Pierwsza zalogowana osoba zostaje adminem. Kolejne dodaje w **Ustawienia → Użytkownicy i role** właściciel katalogu (konto, które go założyło). Rolę i prawa pilnuje Dysk Google, a nie sama aplikacja — szczegóły w `DECISIONS.md`.
 
 ## Blokada aplikacji
 
@@ -36,7 +36,7 @@ zaszyfrowane.
 
 ## Kopie zapasowe
 
-Admin: aplikacja raz na dobę zapisuje w folderze `backups` na Dysku plik `RRRR-MM-DD.json` (dane dzieł, bez zdjęć i bez
+Admin: aplikacja raz na dobę zapisuje w prywatnym folderze `SztuKaFe-Prywatne/backups` na Dysku (pracownik go nie widzi) plik `RRRR-MM-DD.json` (dane dzieł, bez zdjęć i bez
 cen wewnętrznych) i trzyma ostatnie 30. Przywracanie: **Ustawienia → Kopie zapasowe** → wybierz datę → podgląd liczby
 dzieł → **Przywróć**. Przywracanie niczego nie kasuje: dzieła dodane po kopii zostają, usunięte wracają.
 

@@ -132,6 +132,11 @@ export class FakeGoogle {
           return this.json(route, await api.readJson(one[1]));
         }
       }
+      if (one && req.method() === 'PATCH') {
+        const body = req.postDataJSON() as { writersCanShare?: boolean };
+        if (body.writersCanShare === false) await api.restrictSharing(one[1]);
+        return this.json(route, { id: one[1] });
+      }
       if (one && req.method() === 'DELETE') {
         await api.deleteFile(one[1]);
         return route.fulfill({ status: 204, headers: CORS });

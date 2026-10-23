@@ -19,6 +19,8 @@ export interface SyncState {
   /** Rola na tym urządzeniu. Bez konfiguracji Google (praca tylko lokalna) właściciel urządzenia jest adminem. */
   role: Role;
   users: AppUser[];
+  /** Właściciel folderu na Dysku: tylko on dodaje i usuwa osoby. */
+  isOwner: boolean;
   lastSyncAt?: string;
   lastBackupAt?: string;
   error?: string;
@@ -49,6 +51,7 @@ class SyncService {
     status: 'idle',
     role: 'admin',
     users: [],
+    isOwner: true,
   };
 
   // --- stan dla Reacta (useSyncExternalStore) ---
@@ -63,7 +66,7 @@ class SyncService {
   }
 
   private applyAccess(access?: AccessInfo) {
-    if (access) this.set({ role: access.role, users: access.users });
+    if (access) this.set({ role: access.role, users: access.users, isOwner: access.isOwner ?? access.role === 'admin' });
   }
 
   /** Wywoływane raz przy starcie aplikacji. */

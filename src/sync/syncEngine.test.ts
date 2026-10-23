@@ -75,9 +75,9 @@ describe('SyncEngine', () => {
     await seed(b, { title: 'B', createdAt: iso(5), updatedAt: iso(5) });
 
     // B zdąży odczytać licznik i zapisać go dokładnie wtedy, gdy A kończy swoją rezerwację.
-    let settingsWrites = 0; // 1. zapis = lista użytkowników (rola), 2. = rezerwacja numeru
+    let settingsWrites = 0; // settings.json zapisuje tylko rezerwacja numeru
     drive.beforeWriteJson = async (name) => {
-      if (name !== 'settings.json' || ++settingsWrites < 2) return;
+      if (name !== 'settings.json' || ++settingsWrites < 1) return;
       drive.beforeWriteJson = undefined;
       await b.engine.syncNow();
     };

@@ -1,6 +1,5 @@
 import type { Artwork } from '../db/types';
 import type { DriveApi, DriveFile } from './driveApi';
-import type { DriveFolders } from './remoteFormat';
 
 export const KEEP_BACKUPS = 30;
 export const BACKUP_NAME = /^\d{4}-\d{2}-\d{2}\.json$/;
@@ -23,8 +22,8 @@ function localDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export async function listBackups(drive: DriveApi, folders: DriveFolders): Promise<BackupInfo[]> {
-  const files = await drive.listFiles(folders.backupsId);
+export async function listBackups(drive: DriveApi, backupsId: string): Promise<BackupInfo[]> {
+  const files = await drive.listFiles(backupsId);
   return files
     .filter((f: DriveFile) => BACKUP_NAME.test(f.name))
     .map((f) => ({ fileId: f.id, name: f.name, date: f.name.replace('.json', '') }))
@@ -34,17 +33,17 @@ export async function listBackups(drive: DriveApi, folders: DriveFolders): Promi
 /** Zapisuje kopię z dzisiejszą datą (ta sama doba = nadpisanie) i usuwa najstarsze ponad 30. */
 export async function createBackup(
   drive: DriveApi,
-  folders: DriveFolders,
+  backupsId: string,
   artworks: Artwork[],
   user: string,
   now: Date,
 ): Promise<BackupInfo> {
   const name = `${localDate(now)}.json`;
-  const existing = (await listBackups(drive, folders)).find((b) => b.name === name);
+  const existing = (await listBackups(drive, backupsId)).find((b) => b.name === name);
   const data: BackupFile = { schema: 1, createdAt: now.toISOString(), createdBy: user, artworks };
-  const file = await drive.writeJson({ name, parentId: folders.backupsId, data, fileId: existing?.fileId });
+  const file = await drive.writeJson({ name, parentId: backupsId, data, fileId: existing?.fileId });
 
-  const all = await listBackups(drive, folders);
+  const all = await listBackups(drive, backupsId);
   for (const old of all.slice(KEEP_BACKUPS)) await drive.deleteFile(old.fileId);
   return { fileId: file.id, name, date: name.replace('.json', '') };
 }

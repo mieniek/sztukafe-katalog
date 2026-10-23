@@ -9,6 +9,12 @@ test.describe('Role: admin i pracownik', () => {
     const admin = await newDevice(browser, opts, google, 'admin@x.pl');
     const staff = await newDevice(browser, opts, google, 'staff@x.pl');
 
+    // Content-Security-Policy nie może blokować logowania, synchronizacji ani zapisu (nic w konsoli o naruszeniu)
+    const violations: string[] = [];
+    for (const { page } of [admin, staff]) {
+      page.on('console', (m) => /content security policy/i.test(m.text()) && violations.push(m.text()));
+    }
+
     // admin: pierwsza zalogowana osoba, dodaje dzieło z cenami wewnętrznymi
     await signIn(admin.page);
     await addArtwork(admin.page, { title: 'Obraz z cenami', artist: 'Jan Kowalski', price: '9000', purchase: '3000', min: '7000' });
@@ -57,6 +63,11 @@ test.describe('Role: admin i pracownik', () => {
     expect(google.drive.canAccess('admin@x.pl', priceFile.id)).toBe(true);
     expect(google.drive.canAccess('staff@x.pl', priceFile.id)).toBe(false);
     expect(await google.drive.as('staff@x.pl').findFolder('SztuKaFe-Prywatne')).toBeUndefined();
+
+    expect(violations).toEqual([]);
+    // folder główny ma odebrane edytorom prawo udostępniania (zmienia uprawnienia tylko właściciel)
+    const root = [...google.drive.entries.values()].find((e) => e.name === 'SztuKaFe-Katalog')!;
+    expect(root.writersCanShare).toBe(false);
 
     await admin.context.close();
     await staff.context.close();

@@ -25,7 +25,8 @@ function cellToText(cell: unknown): string {
   if (cell instanceof Date) {
     return `${cell.getFullYear()}-${String(cell.getMonth() + 1).padStart(2, '0')}-${String(cell.getDate()).padStart(2, '0')}`;
   }
-  return String(cell).trim();
+  // Eksport CSV poprzedza apostrofem komórki wyglądające jak formuły (=, +, -, @) — tutaj go zdejmujemy.
+  return String(cell).trim().replace(/^'(?=[=+\-@\t\r])/, '');
 }
 
 /** Zamienia tablicę wierszy na tabelę: pierwszy niepusty wiersz = nagłówki, puste wiersze pomijane. */
