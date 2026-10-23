@@ -1,0 +1,106 @@
+.screen {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-deep);
+  color: var(--ink);
+  padding: calc(150px + var(--safe-top)) 32px calc(70px + var(--safe-bottom));
+}
+
+.top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9c978d;
+}
+
+.bottom {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.faceId {
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  border: 2px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s, color 0.3s;
+}
+
+.faceId span {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ok {
+  color: oklch(0.75 0.12 150);
+  border-color: oklch(0.75 0.12 150);
+}
+
+.message {
+  font-size: 14px;
+  color: #b9b4aa;
+}
+
+.unlock {
+  width: 100%;
+  min-height: 54px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--bg-deep);
+  font-weight: 500;
+}
+
+.link {
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+.pinForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pinInput {
+  width: 100%;
+  min-height: 54px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  text-align: center;
+  letter-spacing: 0.4em;
+  font-size: 20px;
+}
+
+.error {
+  color: var(--accent);
+  font-size: 13px;
+  text-align: center;
+}

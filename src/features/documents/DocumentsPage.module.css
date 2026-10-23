@@ -1,0 +1,48 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.page section > h2 {
+  margin-bottom: 8px;
+}
+
+.row {
+  min-height: 72px;
+  justify-content: flex-start;
+  gap: 14px;
+}
+
+.file {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 46px;
+  padding-bottom: 5px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  color: var(--muted);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.rowSub {
+  font-size: 12.5px;
+  color: var(--muted);
+}

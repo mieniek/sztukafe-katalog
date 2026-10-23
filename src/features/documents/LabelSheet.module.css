@@ -1,0 +1,59 @@
+/* Podgląd etykiety jest jasny, bo to dokument do druku (nie zależy od ciemnego motywu). */
+.label {
+  align-self: center;
+  width: 290px;
+  aspect-ratio: 10 / 7;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  background: var(--print-paper);
+  color: var(--print-ink);
+  border-radius: 3px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.artist {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.title {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.year {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 18px;
+  margin-top: 6px;
+}
+
+.details {
+  font-size: 11px;
+  color: #6b6965;
+  margin-top: 4px;
+}
+
+.footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.logo {
+  opacity: 0.55;
+}
+
+.price {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.switchRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 48px;
+}

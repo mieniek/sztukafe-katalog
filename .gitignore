@@ -1,0 +1,13 @@
+node_modules
+dist
+dev-dist
+.env
+.env.*
+!.env.example
+*.local
+.claude/
+tsconfig.tsbuildinfo
+!.env.e2e
+dist-e2e
+test-results
+playwright-report

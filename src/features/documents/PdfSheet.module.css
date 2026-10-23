@@ -1,0 +1,23 @@
+.description {
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.preview {
+  align-self: center;
+  width: 210px;
+  aspect-ratio: 210 / 297;
+  background: var(--print-paper);
+  border-radius: 4px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.open {
+  align-self: center;
+  font-size: 13px;
+  color: var(--muted);
+}

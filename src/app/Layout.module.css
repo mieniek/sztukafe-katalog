@@ -1,0 +1,16 @@
+.shell {
+  min-height: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--bg);
+  position: relative;
+}
+
+.main {
+  min-height: 100%;
+  padding: calc(58px + var(--safe-top)) calc(var(--side) + var(--safe-right)) 40px calc(var(--side) + var(--safe-left));
+}
+
+.withTabs {
+  padding-bottom: var(--tabbar-space);
+}

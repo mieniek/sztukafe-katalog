@@ -1,0 +1,52 @@
+/* Tokeny designu (ciemny motyw wg logo galerii). Kolory wprowadzamy wyłącznie przez te zmienne. */
+:root {
+  --bg: #121211;
+  --bg-deep: #0a0a09;
+  --camera: #0e0d0c;
+  --surface: #1c1b19;
+  --sunken: #262522;
+  --segment-on: #3a3935;
+  --disabled: #2e2d2a;
+
+  --ink: #f3f1ec;
+  --ink-2: #c4bfb6;
+  --muted: #a29d94;
+  --faint: #9b968e; /* jaśniejszy niż w designie (#807b73): kontrast min. 4,5:1 na każdym tle (WCAG AA) */
+  --faint-2: #615d57;
+
+  --hairline: rgba(243, 241, 236, 0.08);
+  --border: rgba(243, 241, 236, 0.12);
+  --overlay: rgba(18, 18, 17, 0.9);
+  --tabbar: rgba(30, 29, 27, 0.86);
+  --backdrop: rgba(20, 19, 17, 0.42);
+
+  --accent: oklch(0.76 0.12 50);
+  --field-missing: oklch(0.6 0.1 45);
+  --danger: oklch(0.64 0.15 30);
+  --warn-bg: oklch(0.3 0.05 75);
+  --warn-fg: oklch(0.86 0.1 80);
+  --warn-sub: oklch(0.76 0.07 75);
+  --toast-action: oklch(0.5 0.12 50);
+
+  --status-dostepne: oklch(0.7 0.12 150);
+  --status-w_magazynie: #9c978d;
+  --status-zarezerwowane: oklch(0.66 0.13 70);
+  --status-sprzedane: oklch(0.66 0.14 30);
+
+  --print-paper: #ffffff;
+  --print-ink: #1a1917;
+
+  --font-display: 'Unbounded Variable', 'Unbounded', system-ui, sans-serif;
+  --font-body: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --side: 20px;
+  --tap-min: 44px;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  --tabbar-space: calc(66px + 26px + var(--safe-bottom) + 24px);
+}

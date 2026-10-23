@@ -1,0 +1,273 @@
+.page {
+  margin: calc(-58px - var(--safe-top)) calc(var(--side) * -1) 0;
+}
+
+.galleryWrap {
+  position: relative;
+  height: 470px;
+  background: #000;
+}
+
+.gallery {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+}
+
+.slideBtn {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.noPhoto {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.back {
+  position: absolute;
+  top: calc(14px + var(--safe-top));
+  left: 16px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--overlay);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--ink);
+}
+
+.counter {
+  position: absolute;
+  top: calc(14px + var(--safe-top));
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--overlay);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.dots {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dotMark {
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(243, 241, 236, 0.4);
+  transition: width 0.2s;
+}
+
+.dotOn {
+  width: 18px;
+  background: var(--ink);
+}
+
+.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullImg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.fullClose {
+  position: absolute;
+  top: calc(14px + var(--safe-top));
+  right: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--overlay);
+  color: var(--ink);
+  font-size: 24px;
+}
+
+.content {
+  padding: 22px var(--side) 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inv {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--faint);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.provisional {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--warn-bg);
+  color: var(--warn-sub);
+  font-size: 10.5px;
+}
+
+.title {
+  font-size: 26px;
+  line-height: 1.02;
+  text-wrap: pretty;
+}
+
+.artist {
+  font-size: 16px;
+  color: var(--ink-2);
+}
+
+.price {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 21px;
+  margin: 6px 0 10px;
+}
+
+.statusBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reservation {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 12px 0 8px;
+}
+
+.action {
+  min-height: 56px;
+  padding: 0 4px;
+  border-radius: 14px;
+  font-size: 13.5px;
+}
+
+.details {
+  margin: 10px 0 0;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  padding: 4px 16px;
+}
+
+.fieldRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--hairline);
+  font-size: 14px;
+}
+
+.fieldRow:first-child {
+  border-top: 0;
+}
+
+.fieldRow dt {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.fieldRow dd {
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.footer {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.todoBanner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin: 6px 0 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+  font-size: 14px;
+}
+
+.todoBanner span {
+  flex: 1;
+  min-width: 120px;
+  color: var(--warn-sub);
+}
+
+.todoBanner .btn,
+.todoBanner a {
+  min-height: 44px;
+}
