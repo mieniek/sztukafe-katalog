@@ -26,6 +26,8 @@ test.describe('Role: admin i pracownik', () => {
     await admin.page.goto('/#/ustawienia/uzytkownicy');
     await admin.page.getByLabel('Adres Google').fill('staff@x.pl');
     await admin.page.getByRole('button', { name: 'Dodaj osobę' }).click();
+    await expect(admin.page.getByText('Udostępnić katalog tej osobie?')).toBeVisible();
+    await admin.page.getByRole('button', { name: 'Udostępnij', exact: true }).click();
     await expect(admin.page.getByText('Dodano osobę — dostała zaproszenie od Google')).toBeVisible();
     await expect(admin.page.getByText('staff@x.pl')).toBeVisible();
 

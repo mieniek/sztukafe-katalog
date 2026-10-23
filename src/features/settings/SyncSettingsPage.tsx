@@ -11,6 +11,7 @@ export function SyncSettingsPage() {
   const state = useSyncState();
   const pending = usePendingCount();
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [confirmWipe, setConfirmWipe] = useState(false);
   const signedIn = state.auth === 'signed-in' || state.auth === 'needs-login';
 
   return (
@@ -69,6 +70,14 @@ export function SyncSettingsPage() {
               </button>
             </div>
           ) : null}
+          {signedIn && (
+            <>
+              <button type="button" className={`${ui.btn} ${ui.danger} ${ui.block}`} onClick={() => setConfirmWipe(true)}>
+                Wyloguj i usuń dane z tego urządzenia
+              </button>
+              <p className={ui.hint}>Dla cudzego lub wspólnego urządzenia. Dane na Dysku Google zostają nietknięte.</p>
+            </>
+          )}
           {(state.auth === 'signed-out' || state.auth === 'needs-login') && (
             <button
               type="button"
@@ -94,6 +103,24 @@ export function SyncSettingsPage() {
           onConfirm={async () => {
             setConfirmLogout(false);
             await syncService.signOut();
+          }}
+        />
+      )}
+      {confirmWipe && (
+        <ConfirmDialog
+          title="Usunąć dane z tego urządzenia?"
+          message={
+            pending > 0
+              ? `${pending} zmian jeszcze nie trafiło na Dysk i przepadnie razem z danymi z tego urządzenia. Najpierw zsynchronizuj, jeśli chcesz je zachować. Blokada PIN zostaje.`
+              : 'Dzieła, zdjęcia i ceny znikną z tego urządzenia. Na Dysku Google zostają, wrócą po ponownym zalogowaniu. Blokada PIN zostaje.'
+          }
+          confirmLabel="Wyloguj i usuń"
+          cancelLabel="Zostaw"
+          danger
+          onCancel={() => setConfirmWipe(false)}
+          onConfirm={async () => {
+            setConfirmWipe(false);
+            await syncService.signOutAndWipe();
           }}
         />
       )}

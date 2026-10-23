@@ -125,6 +125,27 @@ class SyncService {
     this.set({ auth: 'signed-out', email: undefined, displayName: undefined, status: 'idle', error: undefined });
   }
 
+  /**
+   * Wylogowanie z usunięciem wszystkiego, co katalog trzyma na tym urządzeniu (dzieła, zdjęcia, ceny, kolejka,
+   * ustawienia synchronizacji). Zostaje tylko blokada aplikacji (PIN / Face ID). Dane na Dysku Google nie są ruszane.
+   */
+  async signOutAndWipe(): Promise<void> {
+    this.engine.reset();
+    await this.signOut();
+    await db.transaction('rw', [db.artworks, db.photos, db.outbox, db.conflicts, db.remoteArtworks, db.prices, db.meta], async () => {
+      await Promise.all([
+        db.artworks.clear(),
+        db.photos.clear(),
+        db.outbox.clear(),
+        db.conflicts.clear(),
+        db.remoteArtworks.clear(),
+        db.prices.clear(),
+      ]);
+      await db.meta.filter((m) => !m.key.startsWith('lock.')).delete();
+    });
+    this.set({ role: 'admin', users: [], isOwner: true, lastSyncAt: undefined, lastBackupAt: undefined, displayName: undefined });
+  }
+
   /** `force` = ignoruj czas oczekiwania po wcześniejszych błędach. */
   async sync(force = false): Promise<void> {
     if (this.state.auth !== 'signed-in' && this.state.auth !== 'needs-login') return;

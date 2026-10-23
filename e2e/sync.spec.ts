@@ -41,6 +41,46 @@ test.describe('Synchronizacja z Dyskiem Google (atrapa)', () => {
     await b.context.close();
   });
 
+  test('„Wyloguj i usuń dane” czyści urządzenie, a po ponownym zalogowaniu dane wracają z Dysku', async ({ browser }, info) => {
+    const google = new FakeGoogle();
+    const a = await newDevice(browser, info.project.use, google, 'admin@x.pl');
+    await signIn(a.page);
+    await addArtwork(a.page, { title: 'Do wyczyszczenia', artist: 'Anna Nowak', price: '1800' });
+    await syncNow(a.page);
+
+    await a.page.getByRole('button', { name: 'Wyloguj i usuń dane z tego urządzenia' }).click();
+    await a.page.getByRole('button', { name: 'Wyloguj i usuń', exact: true }).click();
+    await expect(a.page.getByRole('button', { name: 'Zaloguj przez Google' })).toBeVisible();
+
+    // w bazie lokalnej nie zostaje nic poza ustawieniami blokady
+    const left = await a.page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((ok, fail) => {
+        const r = indexedDB.open('sztukafe-katalog');
+        r.onsuccess = () => ok(r.result);
+        r.onerror = () => fail(r.error);
+      });
+      const count = (store: string) =>
+        new Promise<number>((ok) => {
+          const r = db.transaction(store).objectStore(store).count();
+          r.onsuccess = () => ok(r.result);
+        });
+      const out: Record<string, number> = {};
+      for (const s of ['artworks', 'photos', 'outbox', 'prices', 'remoteArtworks', 'meta']) out[s] = await count(s);
+      db.close();
+      return out;
+    });
+    expect(left).toEqual({ artworks: 0, photos: 0, outbox: 0, prices: 0, remoteArtworks: 0, meta: 0 });
+
+    await a.page.goto('/#/katalog');
+    await expect(a.page.getByText('Do wyczyszczenia')).toHaveCount(0);
+
+    // dane są nadal na Dysku i wracają po zalogowaniu
+    await signIn(a.page);
+    await a.page.goto('/#/katalog');
+    await expect(visibleText(a.page, 'Do wyczyszczenia')).toBeVisible();
+    await a.context.close();
+  });
+
   test('ta sama edycja na dwóch urządzeniach: wygrywa nowsza, przegrana trafia do „Konflikty”', async ({ browser }, info) => {
     const google = new FakeGoogle();
     const opts = info.project.use;

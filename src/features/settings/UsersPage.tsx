@@ -21,6 +21,7 @@ export function UsersPage() {
   const [role, setRole] = useState<Role>('pracownik');
   const [busy, setBusy] = useState(false);
   const [removing, setRemoving] = useState<string>();
+  const [adding, setAdding] = useState<{ email: string; role: Role }>();
 
   if (state.role !== 'admin') {
     return (
@@ -102,11 +103,9 @@ export function UsersPage() {
 
       <form
         className={`${ui.card} ${styles.stack}`}
-        onSubmit={async (e) => {
+        onSubmit={(e) => {
           e.preventDefault();
-          if (!email.trim()) return;
-          await run(() => syncService.setUserRole(email, role), 'Dodano osobę — dostała zaproszenie od Google');
-          setEmail('');
+          if (email.trim()) setAdding({ email: email.trim(), role });
         }}
       >
         <h2 className={ui.sectionLabel}>Dodaj osobę</h2>
@@ -133,6 +132,24 @@ export function UsersPage() {
           {busy ? 'Zapisuję…' : 'Dodaj osobę'}
         </button>
       </form>
+
+      {adding && (
+        <ConfirmDialog
+          title="Udostępnić katalog tej osobie?"
+          message={`${adding.email} dostanie dostęp do wszystkich dzieł i zdjęć jako ${
+            adding.role === 'admin' ? 'admin (z cenami zakupu i minimalnymi)' : 'pracownik'
+          }. Sprawdź, czy adres jest wpisany bez literówki — zaproszenie wyśle Google.`}
+          confirmLabel="Udostępnij"
+          cancelLabel="Wróć"
+          onCancel={() => setAdding(undefined)}
+          onConfirm={async () => {
+            const who = adding;
+            setAdding(undefined);
+            await run(() => syncService.setUserRole(who.email, who.role), 'Dodano osobę — dostała zaproszenie od Google');
+            setEmail('');
+          }}
+        />
+      )}
 
       {removing && (
         <ConfirmDialog

@@ -172,6 +172,15 @@ export class SyncEngine {
     }
   }
 
+  /** Zapomina foldery, rolę i konto (po wylogowaniu z usunięciem danych urządzenia). */
+  reset(): void {
+    this.folders = undefined;
+    this.privateFolders = undefined;
+    this.access = undefined;
+    this.me = undefined;
+    this.photoFolders.clear();
+  }
+
   getAccess(): AccessInfo | undefined {
     return this.access;
   }
